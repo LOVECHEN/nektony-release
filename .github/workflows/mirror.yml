@@ -36,9 +36,9 @@ jobs:
           xml = open(sys.argv[1], encoding='utf-8', errors='replace').read()
           for enc in re.findall(r'<enclosure\b[^>]*>', xml, re.S):
               g = lambda p: (re.search(p, enc) or [None, ''])[1]
-              url   = g(r'\burl="([^"]+)"')
-              ver   = g(r'sparkle:shortVersionString="([^"]+)"')
-              build = g(r'sparkle:version="([^"]+)"')
+              url   = g(r'\burl=["\']([^"\']+)["\']')
+              ver   = g(r'sparkle:shortVersionString=["\']([^"\']+)["\']')
+              build = g(r'sparkle:version=["\']([^"\']+)["\']')
               if url and ver and build:
                   print(f"{ver}\t{build}\t{url}")
           PY
@@ -81,9 +81,12 @@ jobs:
             echo "::endgroup::"
           }
 
-          mirror_channel "App Cleaner & Uninstaller" "app-cleaner" "https://download.nektony.com/pro-support/v3/app-cleaner/update/update.xml" yes
-          mirror_channel "Funter"      "funter"      "https://download.nektony.com/pro-support/v3/funter/update/update.xml"      no
-          mirror_channel "Disk Expert" "disk-expert" "https://download.nektony.com/pro-support/v3/disk-expert/update/update.xml" no
+          mirror_channel "App Cleaner & Uninstaller" "app-cleaner"           "https://download.nektony.com/pro-support/v3/app-cleaner/update/update.xml"           yes
+          mirror_channel "MacCleaner Pro"            "maccleaner-pro"        "https://download.nektony.com/pro-support/v3/mac-cleaner-pro/update/update.xml"       no
+          mirror_channel "Duplicate File Finder"     "duplicate-file-finder" "https://download.nektony.com/pro-support/v3/duplicates-finder-site/update/update.xml" no
+          mirror_channel "Disk Expert"               "disk-expert"           "https://download.nektony.com/pro-support/v3/disk-expert/update/update.xml"           no
+          mirror_channel "Memory Cleaner"            "memory-cleaner"        "https://download.nektony.com/pro-support/v3/memory-cleaner-x-site/update/update.xml"  no
+          mirror_channel "Funter"                    "funter"                "https://download.nektony.com/pro-support/v3/funter/update/update.xml"                 no
 
       - name: Refresh MIRRORED.md
         if: always()
