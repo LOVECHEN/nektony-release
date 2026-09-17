@@ -1,0 +1,121 @@
+name: mirror
+
+on:
+  schedule:
+    - cron: '23 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      max_per_run:
+        description: 'max new releases per channel per run'
+        default: '8'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mirror
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Mirror channels
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MAX_PER_RUN: ${{ github.event.inputs.max_per_run || '8' }}
+          CHANNELS: ${{ secrets.NEKTONY_CHANNELS }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CHANNELS:-}" ]; then echo "NEKTONY_CHANNELS secret not set"; exit 1; fi
+
+          # Defense in depth: mask every source URL + its host in all logs.
+          # (URLs are never echoed deliberately; this covers appcast enclosure links too.)
+          while IFS='|' read -r name prefix url latest; do
+            [ -n "${url:-}" ] || continue
+            printf '::add-mask::%s\n' "$url"
+            printf '::add-mask::%s\n' "$(printf '%s' "$url" | sed -E 's#^https?://([^/]+).*#\1#')"
+          done <<< "$CHANNELS"
+
+          parse_feed () {
+            python3 - "$1" <<'PY'
+          import re, sys
+          xml = open(sys.argv[1], encoding='utf-8', errors='replace').read()
+          for enc in re.findall(r'<enclosure\b[^>]*>', xml, re.S):
+              g = lambda p: (re.search(p, enc) or [None, ''])[1]
+              url   = g(r'\burl=["\']([^"\']+)["\']')
+              ver   = g(r'sparkle:shortVersionString=["\']([^"\']+)["\']')
+              build = g(r'sparkle:version=["\']([^"\']+)["\']')
+              if url and ver and build:
+                  print(f"{ver}\t{build}\t{url}")
+          PY
+          }
+
+          mirror_channel () {
+            local name="$1" prefix="$2" feed="$3" mark_latest="$4"
+            echo "::group::$prefix"
+            if ! curl -fsSL --retry 3 --max-time 60 "$feed" -o feed.xml 2>/dev/null; then
+              echo "$name: feed fetch failed"; echo "::endgroup::"; return 0
+            fi
+            parse_feed feed.xml > items.tsv || true
+            if [ ! -s items.tsv ]; then echo "$name: no items"; echo "::endgroup::"; return 0; fi
+            local newest_tag="${prefix}-$(sort -t"$(printf '\t')" -k2,2 -nr items.tsv | head -n1 | awk -F'\t' '{print $1"."$2}')"
+            local made=0
+            while IFS=$'\t' read -r ver build url; do
+              local tag="${prefix}-${ver}.${build}"
+              if gh release view "$tag" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1; then echo "skip $tag"; continue; fi
+              if [ "$made" -ge "$MAX_PER_RUN" ]; then echo "$name: hit max_per_run"; break; fi
+              echo "::group::$tag"
+              local dmg="${prefix}-${ver}.${build}.dmg"
+              if ! curl -fL --retry 3 --max-time 900 "$url" -o "$dmg" 2>/dev/null; then
+                echo "$name $ver: download failed"; rm -f "$dmg"; echo "::endgroup::"; continue
+              fi
+              sha256sum "$dmg" > SHA256SUMS.txt
+              local notes
+              notes="$(printf '## %s\n\nVersion %s (build %s) · macOS\n\nFile: `%s`\n\n**SHA-256**\n```\n%s\n```\n\n> Unmodified official build, archived for offline use.\n' \
+                "$name" "$ver" "$build" "$dmg" "$(cat SHA256SUMS.txt)")"
+              local latest="--latest=false"
+              if [ "$mark_latest" = "yes" ] && [ "$tag" = "$newest_tag" ]; then latest="--latest=true"; fi
+              gh release create "$tag" -R "$GITHUB_REPOSITORY" \
+                --title "$name $ver ($build)" --notes "$notes" $latest \
+                "$dmg" SHA256SUMS.txt
+              rm -f "$dmg" SHA256SUMS.txt
+              made=$((made+1))
+              echo "::endgroup::"
+            done < items.tsv
+            echo "$name: created $made"
+            echo "::endgroup::"
+          }
+
+          # All sources come from the NEKTONY_CHANNELS secret (name|prefix|url|latest per line).
+          while IFS='|' read -r name prefix url latest; do
+            [ -n "${url:-}" ] || continue
+            mirror_channel "$name" "$prefix" "$url" "${latest:-no}"
+          done <<< "$CHANNELS"
+
+      - name: Refresh MIRRORED.md
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          {
+            echo "# Mirrored versions"
+            echo
+            echo "> Auto-refreshed · $(date -u '+%Y-%m-%d %H:%M UTC')"
+            echo
+            echo "| Title | Tag | Published (UTC) |"
+            echo "|---|---|---|"
+            gh release list -R "$GITHUB_REPOSITORY" --limit 300 --json tagName,name,createdAt \
+              --jq 'sort_by(.tagName)|reverse|.[]|"| \(.name) | \(.tagName) | \(.createdAt[0:16]|sub("T";" ")) |"' || true
+          } > MIRRORED.md
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add MIRRORED.md
+          if ! git diff --cached --quiet -- MIRRORED.md; then
+            git commit -m "chore: refresh mirrored manifest" && git push
+          else
+            echo "MIRRORED.md unchanged"
+          fi
