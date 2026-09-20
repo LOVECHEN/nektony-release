@@ -1,6 +1,6 @@
 # Mirrored versions
 
-> Auto-refreshed · 2026-09-20 11:35 UTC
+> Auto-refreshed · 2026-09-20 16:15 UTC
 
 | Title | Tag | Published (UTC) |
 |---|---|---|
@@ -10,3 +10,4 @@
 | Duplicate File Finder 9.2.2 (1042) | duplicate-file-finder-9.2.2.1042 | 2026-09-17 07:55 |
 | Disk Expert 6.0.2 (572) | disk-expert-6.0.2.572 | 2026-09-17 07:46 |
 | App Cleaner & Uninstaller 10.0 (2318) | app-cleaner-10.0.2318 | 2026-09-17 07:46 |
+| App Cleaner & Uninstaller 10.0.1 (2336) | app-cleaner-10.0.1.2336 | 2026-09-20 11:35 |
