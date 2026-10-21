@@ -1,11 +1,12 @@
 # Mirrored versions
 
-> Auto-refreshed · 2026-10-21 12:02 UTC
+> Auto-refreshed · 2026-10-21 17:21 UTC
 
 | Title | Tag | Published (UTC) |
 |---|---|---|
 | Memory Cleaner 5.5.4 (276) | memory-cleaner-5.5.4.276 | 2026-10-21 04:59 |
 | Memory Cleaner 5.5.3 (271) | memory-cleaner-5.5.3.271 | 2026-09-17 07:55 |
+| MacCleaner Pro 4.0.5 (665) | maccleaner-pro-4.0.5.665 | 2026-10-21 12:02 |
 | MacCleaner Pro 4.0.4 (606) | maccleaner-pro-4.0.4.606 | 2026-09-17 07:55 |
 | Funter 7.1.3 (382) | funter-7.1.3.382 | 2026-10-21 04:59 |
 | Funter 7.1.2 (377) | funter-7.1.2.377 | 2026-09-17 07:46 |
