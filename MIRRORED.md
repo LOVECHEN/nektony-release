@@ -1,6 +1,6 @@
 # Mirrored versions
 
-> Auto-refreshed · 2026-10-28 13:12 UTC
+> Auto-refreshed · 2026-10-28 22:41 UTC
 
 | Title | Tag | Published (UTC) |
 |---|---|---|
@@ -10,10 +10,12 @@
 | MacCleaner Pro 4.0.4 (606) | maccleaner-pro-4.0.4.606 | 2026-09-17 07:55 |
 | Funter 7.1.3 (382) | funter-7.1.3.382 | 2026-10-21 04:59 |
 | Funter 7.1.2 (377) | funter-7.1.2.377 | 2026-09-17 07:46 |
+| Duplicate File Finder 9.2.4 (1099) | duplicate-file-finder-9.2.4.1099 | 2026-10-28 13:12 |
 | Duplicate File Finder 9.2.3 (1092) | duplicate-file-finder-9.2.3.1092 | 2026-10-21 04:59 |
 | Duplicate File Finder 9.2.2 (1042) | duplicate-file-finder-9.2.2.1042 | 2026-09-17 07:55 |
 | Disk Expert 6.0.3 (599) | disk-expert-6.0.3.599 | 2026-10-21 04:59 |
 | Disk Expert 6.0.2 (572) | disk-expert-6.0.2.572 | 2026-09-17 07:46 |
+| App Cleaner & Uninstaller 10.0.3 (2406) | app-cleaner-10.0.3.2406 | 2026-10-28 13:12 |
 | App Cleaner & Uninstaller 10.0 (2318) | app-cleaner-10.0.2318 | 2026-09-17 07:46 |
 | App Cleaner & Uninstaller 10.0.2 (2399) | app-cleaner-10.0.2.2399 | 2026-10-21 04:59 |
 | App Cleaner & Uninstaller 10.0.1 (2336) | app-cleaner-10.0.1.2336 | 2026-09-20 11:35 |
